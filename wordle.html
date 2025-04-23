@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Wordle</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121213;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding-top: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #board {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 10px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+    .tile {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #3a3a3c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: #121213;
+      color: white;
+    }
+    .correct {
+      background-color: #538d4e;
+    }
+    .present {
+      background-color: #b59f3b;
+    }
+    .absent {
+      background-color: #3a3a3c;
+    }
+    input {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 18px;
+      width: 200px;
+      text-transform: uppercase;
+    }
+    #message {
+      margin-top: 10px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mini Wordle</h1>
+  <div id="board"></div>
+  <input type="text" id="guessInput" maxlength="5" placeholder="Enter guess" autofocus>
+  <div id="message"></div>
+
+  <script>
+    const words = ["apple", "grape", "mango", "lemon", "peach", "berry", "melon", "plumb"];
+    const solution = words[Math.floor(Math.random() * words.length)];
+    let currentRow = 0;
+
+    const board = document.getElementById('board');
+    const input = document.getElementById('guessInput');
+    const message = document.getElementById('message');
+
+    // Create board rows
+    for (let i = 0; i < 6; i++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      for (let j = 0; j < 5; j++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        row.appendChild(tile);
+      }
+      board.appendChild(row);
+    }
+
+    function checkGuess(guess) {
+      guess = guess.toLowerCase();
+      const rowTiles = board.children[currentRow].children;
+      const solutionArray = solution.split('');
+      const guessArray = guess.split('');
+
+      // First pass - check for correct letters
+      for (let i = 0; i < 5; i++) {
+        rowTiles[i].textContent = guess[i];
+        if (guess[i] === solution[i]) {
+          rowTiles[i].classList.add('correct');
+          solutionArray[i] = null;
+          guessArray[i] = null;
+        }
+      }
+
+      // Second pass - check for present letters
+      for (let i = 0; i < 5; i++) {
+        if (guessArray[i] && solutionArray.includes(guessArray[i])) {
+          rowTiles[i].classList.add('present');
+          solutionArray[solutionArray.indexOf(guessArray[i])] = null;
+        } else if (guessArray[i]) {
+          rowTiles[i].classList.add('absent');
+        }
+      }
+
+      if (guess === solution) {
+        message.textContent = "🎉 Correct! You win!";
+        input.disabled = true;
+      } else if (currentRow === 5) {
+        message.textContent = `❌ Game over! Word was: ${solution.toUpperCase()}`;
+        input.disabled = true;
+      } else {
+        currentRow++;
+        input.value = '';
+      }
+    }
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && input.value.length === 5) {
+        checkGuess(input.value);
+      }
+    });
+  </script>
+</body>
+</html>
